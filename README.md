@@ -4,9 +4,10 @@ Local, offline tooling for turning a ChatGPT export into a durable, searchable a
 
 ## Project status
 
-Milestone **M0** is implemented. The repository currently provides a runnable CLI skeleton,
-configuration loading, structured diagnostics and logging, filesystem self-checks, atomic file
-writes, primary port contracts, tests, and CI. It does **not** import ChatGPT exports yet.
+Milestone **M0** and the first vertical slice of **M1** are implemented. The repository provides
+a runnable CLI, configuration, structured diagnostics and logging, filesystem self-checks, safe
+read-only directory/ZIP source adapters, and structural export inventory. It does **not** parse
+ChatGPT JSON, build conversations, or persist imported data yet.
 
 ## Requirements
 
@@ -43,6 +44,21 @@ Machine-readable output:
 ```bash
 chat-archive-explorer doctor --json
 ```
+
+## Inspect an export source
+
+Inspect a ChatGPT export directory or ZIP without parsing JSON or changing the source:
+
+```bash
+chat-archive-explorer inspect-export /path/to/export
+chat-archive-explorer inspect-export /path/to/export.zip --json
+```
+
+The command inventories regular files, rejects unsafe or duplicate normalized paths, reports
+known files, and requires `conversations.json` plus `export_manifest.json` at the selected source
+root. Exit code `0` means the source passed this structural check; exit code `20` means the source
+could not be opened safely or required files are missing. Passing this check does not yet confirm
+JSON validity or an export-format version.
 
 ## Development checks
 

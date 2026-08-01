@@ -16,11 +16,15 @@ class SourceEntry:
 
     path: PurePosixPath
     size: int
+    compressed_size: int | None = None
 
 
 @runtime_checkable
 class ImportSourcePort(Protocol):
     """Read-only access to a directory or archive source."""
+
+    @property
+    def source_kind(self) -> str: ...
 
     def entries(self) -> Iterable[SourceEntry]: ...
 
@@ -29,6 +33,13 @@ class ImportSourcePort(Protocol):
     def fingerprint(self) -> str: ...
 
     def close(self) -> None: ...
+
+
+@runtime_checkable
+class ImportSourceFactoryPort(Protocol):
+    """Open a supported import source without exposing adapter details."""
+
+    def open(self, path: Path) -> ImportSourcePort: ...
 
 
 @runtime_checkable

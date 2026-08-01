@@ -3,6 +3,7 @@
 from chat_archive_explorer.application.ports import (
     BlobStorePort,
     DiagnosticSink,
+    ImportSourceFactoryPort,
     ImportSourcePort,
     RuntimeFilesystemPort,
     SourceEntry,
@@ -11,6 +12,7 @@ from chat_archive_explorer.application.ports import (
 __all__ = [
     "BlobStorePort",
     "DiagnosticSink",
+    "ImportSourceFactoryPort",
     "ImportSourcePort",
     "RuntimeFilesystemPort",
     "SourceEntry",

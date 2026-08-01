@@ -6,6 +6,13 @@ The format follows Keep a Changelog and the project uses Semantic Versioning.
 
 ## [Unreleased]
 
+### Added
+
+- Added `inspect-export` for read-only structural inspection of export directories and ZIP files.
+- Added deterministic source inventory with required and known-file reporting.
+- Added path traversal, symbolic-link, duplicate-path, and inventory-limit protections.
+- Added stable M1 Slice 1 diagnostics and JSON output.
+
 ### Fixed
 
 - Added `pytest` to the `dev` optional dependency set.

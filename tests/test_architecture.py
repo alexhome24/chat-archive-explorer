@@ -80,6 +80,7 @@ class ArchitectureBoundaryTests(unittest.TestCase):
             "exporters",
             "filesystem",
             "importers",
+            "infrastructure",
             "logging_config",
             "presentation",
             "search",
@@ -93,6 +94,18 @@ class ArchitectureBoundaryTests(unittest.TestCase):
                     imported_root,
                     forbidden_roots,
                     f"Application layer imports {imported} in {path}",
+                )
+
+    def test_infrastructure_layer_does_not_import_cli_or_presentation(self) -> None:
+        forbidden_roots = {"cli", "presentation"}
+        for path in (PACKAGE_ROOT / "infrastructure").rglob("*.py"):
+            for imported in _project_imports(path):
+                parts = imported.split(".")
+                imported_root = parts[1] if len(parts) > 1 else ""
+                self.assertNotIn(
+                    imported_root,
+                    forbidden_roots,
+                    f"Infrastructure layer imports {imported} in {path}",
                 )
 
     def test_production_code_has_no_unresolved_placeholders(self) -> None:

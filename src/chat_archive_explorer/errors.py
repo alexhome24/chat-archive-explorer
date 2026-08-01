@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from enum import IntEnum
+from typing import Any
+
+from chat_archive_explorer.diagnostics import Diagnostic, DiagnosticSeverity
 
 
 class ExitCode(IntEnum):
@@ -35,6 +39,39 @@ class ValidationError(ChatArchiveError):
 
 class ImportError(ChatArchiveError):
     """Raised for import pipeline failures."""
+
+    exit_code = ExitCode.VALIDATION_ERROR
+
+
+class ImportSourceError(ImportError):
+    """Expected failure while opening or inventorying an import source."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str,
+        source: str,
+        recovery: str | None = None,
+        details: Mapping[str, Any] | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.code = code
+        self.source = source
+        self.recovery = recovery
+        self.details = dict(details or {})
+
+    def to_diagnostic(self) -> Diagnostic:
+        """Convert the expected failure to a stable user-facing diagnostic."""
+
+        return Diagnostic(
+            severity=DiagnosticSeverity.ERROR,
+            code=self.code,
+            message=str(self),
+            recovery=self.recovery,
+            source=self.source,
+            details=self.details,
+        )
 
 
 class StorageError(ChatArchiveError):
