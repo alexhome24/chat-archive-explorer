@@ -5,6 +5,7 @@ from chat_archive_explorer.application.ports import (
     DiagnosticSink,
     ImportSourceFactoryPort,
     ImportSourcePort,
+    LogicalJsonValidatorPort,
     RuntimeFilesystemPort,
     SourceEntry,
 )
@@ -14,6 +15,7 @@ __all__ = [
     "DiagnosticSink",
     "ImportSourceFactoryPort",
     "ImportSourcePort",
+    "LogicalJsonValidatorPort",
     "RuntimeFilesystemPort",
     "SourceEntry",
 ]

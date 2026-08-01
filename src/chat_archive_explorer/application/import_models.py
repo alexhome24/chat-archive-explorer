@@ -55,6 +55,39 @@ class SourceInventory:
 
 
 @dataclass(frozen=True, slots=True)
+class LogicalFileValidation:
+    """Validation result for one required logical JSON file."""
+
+    path: str
+    utf8_valid: bool
+    json_valid: bool
+    top_level_type: str | None
+    structure_valid: bool
+    item_count: int | None
+    diagnostics: tuple[Diagnostic, ...]
+
+    @property
+    def is_valid(self) -> bool:
+        """Return true when all validation stages succeeded."""
+
+        return self.utf8_valid and self.json_valid and self.structure_valid
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize the validation result using stable field names."""
+
+        return {
+            "path": self.path,
+            "valid": self.is_valid,
+            "utf8_valid": self.utf8_valid,
+            "json_valid": self.json_valid,
+            "top_level_type": self.top_level_type,
+            "structure_valid": self.structure_valid,
+            "item_count": self.item_count,
+            "diagnostics": [diagnostic.to_dict() for diagnostic in self.diagnostics],
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class ExportInspectionReport:
     """Complete structural inspection result for one directory or ZIP source."""
 
@@ -66,11 +99,12 @@ class ExportInspectionReport:
     required_files_present: tuple[str, ...]
     required_files_missing: tuple[str, ...]
     known_files_present: tuple[str, ...]
+    logical_files: tuple[LogicalFileValidation, ...]
     diagnostics: tuple[Diagnostic, ...]
 
     @property
     def is_valid(self) -> bool:
-        """Return true when structural inspection produced no error diagnostic."""
+        """Return true when inspection produced no error diagnostic."""
 
         return all(
             diagnostic.severity not in {DiagnosticSeverity.ERROR, DiagnosticSeverity.CRITICAL}
@@ -90,5 +124,6 @@ class ExportInspectionReport:
             "required_files_present": list(self.required_files_present),
             "required_files_missing": list(self.required_files_missing),
             "known_files_present": list(self.known_files_present),
+            "logical_files": [item.to_dict() for item in self.logical_files],
             "diagnostics": [diagnostic.to_dict() for diagnostic in self.diagnostics],
         }

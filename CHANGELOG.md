@@ -12,6 +12,8 @@ The format follows Keep a Changelog and the project uses Semantic Versioning.
 - Added deterministic source inventory with required and known-file reporting.
 - Added path traversal, symbolic-link, duplicate-path, and inventory-limit protections.
 - Added stable M1 Slice 1 diagnostics and JSON output.
+- Added UTF-8, JSON syntax, top-level type, and minimal structure validation for required JSON files.
+- Added stable logical-file validation results and M1 Slice 2 diagnostics.
 
 ### Fixed
 

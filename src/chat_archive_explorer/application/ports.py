@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import BinaryIO, Protocol, runtime_checkable
 
+from chat_archive_explorer.application.import_models import LogicalFileValidation
 from chat_archive_explorer.diagnostics import Diagnostic
 
 
@@ -40,6 +41,13 @@ class ImportSourceFactoryPort(Protocol):
     """Open a supported import source without exposing adapter details."""
 
     def open(self, path: Path) -> ImportSourcePort: ...
+
+
+@runtime_checkable
+class LogicalJsonValidatorPort(Protocol):
+    """Validate required logical JSON files without creating domain entities."""
+
+    def validate(self, path: PurePosixPath, stream: BinaryIO) -> LogicalFileValidation: ...
 
 
 @runtime_checkable

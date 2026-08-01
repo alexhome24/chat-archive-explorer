@@ -15,6 +15,7 @@ from chat_archive_explorer.application.import_models import ExportInspectionRepo
 from chat_archive_explorer.config import AppConfig
 from chat_archive_explorer.errors import ChatArchiveError, ExitCode
 from chat_archive_explorer.filesystem import LocalFilesystem
+from chat_archive_explorer.importers.openai_export import OpenAIJsonValidator
 from chat_archive_explorer.infrastructure.import_sources import LocalImportSourceFactory
 from chat_archive_explorer.logging_config import configure_logging
 from chat_archive_explorer.version import __version__
@@ -66,6 +67,14 @@ def _print_inspection_report(report: ExportInspectionReport) -> None:
         print("Required files missing: " + ", ".join(report.required_files_missing))
     if report.known_files_present:
         print("Known optional files: " + ", ".join(report.known_files_present))
+    for logical_file in report.logical_files:
+        status = "valid" if logical_file.is_valid else "invalid"
+        print(
+            f"JSON file: {logical_file.path} ({status}; "
+            f"UTF-8={logical_file.utf8_valid}; JSON={logical_file.json_valid}; "
+            f"top-level={logical_file.top_level_type or 'unavailable'}; "
+            f"structure={logical_file.structure_valid})"
+        )
     for diagnostic in report.diagnostics:
         print(f"[{diagnostic.severity.value}] {diagnostic.code}: {diagnostic.message}")
         if diagnostic.recovery is not None:
@@ -90,7 +99,9 @@ def run(argv: Sequence[str] | None = None) -> int:
             return int(ExitCode.SUCCESS if report.is_healthy else ExitCode.VALIDATION_ERROR)
 
         if args.command == "inspect-export":
-            inspection = inspect_export(args.source, LocalImportSourceFactory())
+            inspection = inspect_export(
+                args.source, LocalImportSourceFactory(), OpenAIJsonValidator()
+            )
             if args.json:
                 print(
                     json.dumps(inspection.to_dict(), ensure_ascii=False, indent=2, sort_keys=True)

@@ -6,8 +6,9 @@ Local, offline tooling for turning a ChatGPT export into a durable, searchable a
 
 Milestone **M0** and the first vertical slice of **M1** are implemented. The repository provides
 a runnable CLI, configuration, structured diagnostics and logging, filesystem self-checks, safe
-read-only directory/ZIP source adapters, and structural export inventory. It does **not** parse
-ChatGPT JSON, build conversations, or persist imported data yet.
+read-only directory/ZIP source adapters, structural export inventory, and minimal validation of the
+required JSON files. It does **not** normalize conversations, build message graphs, or persist
+imported data yet.
 
 ## Requirements
 
@@ -47,7 +48,7 @@ chat-archive-explorer doctor --json
 
 ## Inspect an export source
 
-Inspect a ChatGPT export directory or ZIP without parsing JSON or changing the source:
+Inspect a ChatGPT export directory or ZIP without changing the source:
 
 ```bash
 chat-archive-explorer inspect-export /path/to/export
@@ -56,9 +57,11 @@ chat-archive-explorer inspect-export /path/to/export.zip --json
 
 The command inventories regular files, rejects unsafe or duplicate normalized paths, reports
 known files, and requires `conversations.json` plus `export_manifest.json` at the selected source
-root. Exit code `0` means the source passed this structural check; exit code `20` means the source
-could not be opened safely or required files are missing. Passing this check does not yet confirm
-JSON validity or an export-format version.
+root. It then checks that both required files are UTF-8, contain valid JSON, use the expected
+top-level JSON type, and satisfy the minimal confirmed source structure. Conversation records need
+`id` or `conversation_id`, and `mapping` must be a JSON object. Exit code `0` means all checks
+passed; exit code `20` means validation failed. This command does not normalize records, validate
+message graphs, or identify an export-format version.
 
 ## Development checks
 

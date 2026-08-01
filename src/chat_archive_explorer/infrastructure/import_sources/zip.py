@@ -7,7 +7,7 @@ import stat
 import zipfile
 from collections.abc import Iterable
 from pathlib import Path, PurePosixPath
-from typing import BinaryIO
+from typing import BinaryIO, cast
 
 from chat_archive_explorer.application.ports import SourceEntry
 from chat_archive_explorer.errors import ImportSourceError
@@ -74,7 +74,7 @@ class ZipImportSource:
                 details={"entry_path": path.as_posix()},
             )
         try:
-            return self._archive.open(info, mode="r")
+            return cast(BinaryIO, self._archive.open(info, mode="r"))
         except (OSError, RuntimeError, zipfile.BadZipFile) as exc:
             raise ImportSourceError(
                 f"Cannot open ZIP entry: {path.as_posix()}",

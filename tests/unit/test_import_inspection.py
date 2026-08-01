@@ -82,3 +82,45 @@ class ImportInspectionTests(unittest.TestCase):
         self.assertEqual(payload["source_kind"], "fake")
         self.assertEqual(payload["inventory"]["entry_count"], 2)
         self.assertEqual(payload["required_files_missing"], [])
+
+
+class FakeJsonValidator:
+    def validate(self, path: PurePosixPath, stream: BinaryIO):
+        from chat_archive_explorer.application.import_models import LogicalFileValidation
+        from chat_archive_explorer.diagnostics import Diagnostic, DiagnosticSeverity
+
+        stream.read()
+        diagnostic = Diagnostic(
+            severity=DiagnosticSeverity.INFO,
+            code="CAE-M1-JSON-VALID",
+            message="valid",
+            source=path.as_posix(),
+        )
+        return LogicalFileValidation(
+            path=path.as_posix(),
+            utf8_valid=True,
+            json_valid=True,
+            top_level_type="array" if path.name == "conversations.json" else "object",
+            structure_valid=True,
+            item_count=0,
+            diagnostics=(diagnostic,),
+        )
+
+
+class ImportInspectionLogicalValidationTests(unittest.TestCase):
+    def test_validator_runs_for_both_required_files(self) -> None:
+        source = FakeImportSource(("conversations.json", "export_manifest.json"))
+        report = inspect_export(Path("export"), FakeFactory(source), FakeJsonValidator())
+
+        self.assertTrue(report.is_valid)
+        self.assertEqual(
+            [item.path for item in report.logical_files],
+            ["conversations.json", "export_manifest.json"],
+        )
+
+    def test_validator_does_not_run_when_required_file_is_missing(self) -> None:
+        source = FakeImportSource(("conversations.json",))
+        report = inspect_export(Path("export"), FakeFactory(source), FakeJsonValidator())
+
+        self.assertFalse(report.is_valid)
+        self.assertEqual(report.logical_files, ())
